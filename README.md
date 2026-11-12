@@ -6,7 +6,7 @@ Human-feeling breaks with a shoegaze veil: swung, dragging, ghosted drums drowne
 ## Install (no Xcode needed)
 
 1. Open this repo's **Actions** tab, click the latest green **build-mac** run, and download **Josinator-mac** at the bottom.
-2. Unzip it and copy the two bundles:
+2. Unzip it, then double-click the **Josinator-mac.zip** inside it. You get a `Josinator` folder holding two bundles. On a Mac a plugin bundle *is* a folder, so `Josinator.vst3` may look like a plain folder: copy the whole thing.
    - `Josinator.vst3` → `~/Library/Audio/Plug-Ins/VST3/`
    - `Josinator.component` → `~/Library/Audio/Plug-Ins/Components/`
 3. macOS quarantines downloaded plugins, so clear that once in Terminal:

@@ -13,12 +13,14 @@ jobs:
         run: cmake --build build --config Release -- -quiet
       - name: Test DSP
         run: ctest --test-dir build -C Release --output-on-failure
+      # Zip with ditto first: upload-artifact drops the executable bit inside the bundles.
       - name: Package
         run: |
-          mkdir dist
-          cp -R build/Josinator_artefacts/Release/VST3/Josinator.vst3 dist/
-          cp -R build/Josinator_artefacts/Release/AU/Josinator.component dist/
+          mkdir -p pkg/Josinator dist
+          cp -R build/Josinator_artefacts/Release/VST3/Josinator.vst3 pkg/Josinator/
+          cp -R build/Josinator_artefacts/Release/AU/Josinator.component pkg/Josinator/
+          ditto -c -k --keepParent pkg/Josinator dist/Josinator-mac.zip
       - uses: actions/upload-artifact@v4
         with:
           name: Josinator-mac
-          path: dist
+          path: dist/Josinator-mac.zip
