@@ -254,15 +254,17 @@ void JosinatorProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::M
         std::fill (bL, bL + n, 0.0f); std::fill (bR, bR + n, 0.0f);
         bloom.process (L, R, bL, bR, n, (int) (60.0 / bpm * sr));
 
-        for (int i = 0; i < n; ++i) // reverb input: kit + bloom + last block's octave-up tail (the shimmer loop)
+        // Reverb input: kit + bloom + last block's octave-up tail (the shimmer loop).
+        // The loop is soft-limited and kept under unity gain: at 0.8 and wet 1.0 it ran away within seconds.
+        for (int i = 0; i < n; ++i)
         {
-            rL[i] = 0.35f * L[i] + bl * bL[i] + sh * 0.8f * sL[i];
-            rR[i] = 0.35f * R[i] + bl * bR[i] + sh * 0.8f * sR[i];
+            rL[i] = 0.35f * L[i] + bl * bL[i] + sh * 0.3f * std::tanh (sL[i]);
+            rR[i] = 0.35f * R[i] + bl * bR[i] + sh * 0.3f * std::tanh (sR[i]);
         }
         juce::Reverb::Parameters p;
-        p.roomSize = 0.55f + 0.44f * nave;
+        p.roomSize = 0.55f + 0.37f * nave;
         p.damping = 0.35f;
-        p.wetLevel = 1.0f;
+        p.wetLevel = 0.45f;
         p.dryLevel = 0.0f;
         p.width = 1.0f;
         reverb.setParameters (p);
@@ -285,8 +287,8 @@ void JosinatorProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::M
             while (k < kicks && kickAt[k] <= (float) i) { breathEnv = 1.0f; ++k; }
             const float g = 1.0f - breath * 0.9f * breathEnv;
             breathEnv *= release;
-            L[i] += wL[i] * g;
-            R[i] += wR[i] * g;
+            L[i] += std::tanh (wL[i]) * g; // soft limit: a maxed-out veil stays loud, never explodes
+            R[i] += std::tanh (wR[i]) * g;
         }
     }
     else
@@ -303,6 +305,21 @@ void JosinatorProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::M
         L[i] = (dL[i] + mix * ((m + s) - dL[i])) * gain;
         R[i] = (dR[i] + mix * ((m - s) - dR[i])) * gain;
     }
+
+    // Guard: if any effect ever produces invalid audio, output silence for this block and reset
+    // the effects, instead of FL muting the channel for good. (prepare() reuses existing memory.)
+    for (int i = 0; i < n; ++i)
+        if (! std::isfinite (L[i]) || ! std::isfinite (R[i]))
+        {
+            buffer.clear();
+            reverb.reset();
+            shimBuf.clear();
+            bloom.prepare (sr); shimmer.prepare (sr); haze.prepare (sr); smear.prepare (sr);
+            lowpass.reset();
+            crusher = {};
+            breathEnv = 0.0f;
+            break;
+        }
 }
 
 void JosinatorProcessor::getStateInformation (juce::MemoryBlock& destData)
