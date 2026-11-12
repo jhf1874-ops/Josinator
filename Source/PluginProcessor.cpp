@@ -40,8 +40,17 @@ int laneForNote (int note, float& tune)
         case 41: case 43: case 45: case 47: case 48: case 50:
             tune = std::pow (2.0f, (float) (note - 45) / 12.0f);
             return jz::kToms;
-        default: return -1;
+        default: break;
     }
+    // FL's preview, typing keyboard and default piano-roll notes sit around C5 (60):
+    // the octave from C5 plays the kit on white keys (black keys repeat the key below).
+    if (note >= 60 && note < 72)
+    {
+        static constexpr int lanes[12] = { jz::kKick, jz::kKick, jz::kSnare, jz::kSnare, jz::kGhost, jz::kHats,
+                                           jz::kHats, jz::kWash, jz::kWash, jz::kToms, jz::kToms, jz::kRim };
+        return lanes[note - 60];
+    }
+    return -1;
 }
 } // namespace
 

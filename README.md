@@ -30,9 +30,11 @@ It installs itself into the plugin folders above, and a standalone app lands in 
 
 ## Use it in FL Studio
 
-Load Josinator into the **Channel Rack** as a generator and press play: it follows FL's tempo and song position. The standalone app free-runs at the tome's tempo.
+Load Josinator into the **Channel Rack** as a generator and **press FL's Play button**: the pattern only runs while FL's transport is playing, following FL's tempo and song position. The standalone app free-runs at the tome's tempo.
 
-You can also play the kit from the piano roll using General MIDI drum notes: C1 kick, D1 snare, E1 ghost, C#1 rim, F#1 hats, D#2 wash, and toms on F1 to D2.
+To hear single hits, use your keyboard or the piano roll. The white keys from C5 play Kick, Snare, Ghost, Hats, Wash, Toms, Rim. General MIDI drum notes work too: C1 kick, D1 snare, E1 ghost, C#1 rim, F#1 hats, D#2 wash, and toms on F1 to D2.
+
+Still silent? Check that the channel is routed to a mixer track that isn't muted, and that the Mix knob isn't at 0 or Gain right down.
 
 ## What's inside
 
