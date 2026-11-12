@@ -1,0 +1,24 @@
+# Builds the Josinator on GitHub's Macs so you can get the plugin without installing Xcode.
+# Actions tab -> latest run -> download the "Josinator-mac" artifact.
+name: build-mac
+on: [push, workflow_dispatch]
+jobs:
+  build:
+    runs-on: macos-15-intel
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure
+        run: cmake -B build -G Xcode -DCMAKE_BUILD_TYPE=Release
+      - name: Build
+        run: cmake --build build --config Release -- -quiet
+      - name: Test DSP
+        run: ctest --test-dir build -C Release --output-on-failure
+      - name: Package
+        run: |
+          mkdir dist
+          cp -R build/Josinator_artefacts/Release/VST3/Josinator.vst3 dist/
+          cp -R build/Josinator_artefacts/Release/AU/Josinator.component dist/
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Josinator-mac
+          path: dist
